@@ -88,8 +88,6 @@
 
   function goToReading() {
     stopCamera();
-    const url = capturedSource.toDataURL("image/jpeg", 0.92);
-    $("readingPhoto").style.backgroundImage = `url(${url})`;
     resetReading();
     show("reading");
   }

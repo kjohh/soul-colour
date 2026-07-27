@@ -219,21 +219,6 @@ body {
   justify-content: center;
   min-height: 70dvh;
 }
-.reading-photo {
-  position: absolute;
-  inset: -22px;
-  background-size: cover;
-  background-position: center;
-  border-radius: 26px;
-  filter: saturate(0.9);
-}
-.reading-veil {
-  position: absolute;
-  inset: -22px;
-  border-radius: 26px;
-  background: radial-gradient(120% 100% at 50% 42%, rgba(11,11,18,0.35), rgba(11,11,18,0.82));
-  backdrop-filter: blur(2px);
-}
 .reading-inner {
   position: relative;
   z-index: 1;
