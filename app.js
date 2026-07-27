@@ -136,7 +136,18 @@
     orb.classList.remove("is-holding");
     orb.style.setProperty("--p", "0");
     gradient = makeGradient();
-    setTimeout(renderResult, 460);
+    triggerBurst();
+    setTimeout(renderResult, 620);
+  }
+
+  // 靈魂色光整片放大後淡出，作為轉場
+  function triggerBurst() {
+    const b = document.createElement("div");
+    b.className = "soul-burst";
+    b.style.background =
+      `radial-gradient(circle at 50% 46%, ${gradient.stops.join(", ")}, transparent 72%)`;
+    document.body.appendChild(b);
+    setTimeout(() => b.remove(), 820);
   }
 
   orb.addEventListener("pointerdown", startHold);
@@ -176,6 +187,11 @@
     $("resultOverlay").style.background = gradientCss(gradient);
     $("resultCaption").textContent = formatDate();
     show("result");
+    // 重新觸發印出動畫
+    const pol = $("polaroid");
+    pol.classList.remove("printing");
+    void pol.offsetWidth;
+    pol.classList.add("printing");
   }
 
   // ---------- 下載合成 ----------
