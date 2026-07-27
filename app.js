@@ -93,71 +93,48 @@
   }
 
   // ---------- 按壓讀取 ----------
+  // 刻意不顯示進度：讓使用者不知道還要按多久。
   const orb = $("orb");
-  const ring = $("ringProgress");
-  const RING_C = 339.29;
-  const DURATION = 2600;
   const hint = $("readingHint");
-  const percentEl = $("readingPercent");
+  const DURATION = 2600;
 
-  let holding = false;
-  let holdStart = 0;
-  let rafId = null;
+  let holdTimer = null;
   let done = false;
 
-  function setProgress(p) {
-    orb.style.setProperty("--p", p.toFixed(3));
-    ring.style.strokeDashoffset = (RING_C * (1 - p)).toFixed(2);
-    percentEl.textContent = p > 0 ? `讀取中　${Math.round(p * 100)}%` : "";
-  }
-
   function resetReading() {
-    holding = false;
     done = false;
-    holdStart = 0;
-    if (rafId) cancelAnimationFrame(rafId);
-    rafId = null;
-    setProgress(0);
+    clearTimeout(holdTimer);
+    orb.classList.remove("is-holding");
+    orb.style.setProperty("--p", "0");
     hint.textContent = "請用食指輕輕按住";
     hint.style.opacity = "1";
-  }
-
-  function tick(now) {
-    if (!holding) return;
-    const p = Math.min((now - holdStart) / DURATION, 1);
-    setProgress(p);
-    if (p >= 1) {
-      finishReading();
-      return;
-    }
-    rafId = requestAnimationFrame(tick);
   }
 
   function startHold(e) {
     if (done) return;
     e.preventDefault();
-    holding = true;
-    holdStart = performance.now();
+    orb.classList.add("is-holding");
+    orb.style.setProperty("--p", "1");
     hint.textContent = "正在讀取靈魂能量";
-    hint.style.opacity = "0.75";
+    hint.style.opacity = "0.7";
     try { orb.setPointerCapture(e.pointerId); } catch (_) {}
-    rafId = requestAnimationFrame(tick);
+    clearTimeout(holdTimer);
+    holdTimer = setTimeout(finishReading, DURATION);
   }
 
   function cancelHold() {
-    if (done || !holding) return;
-    holding = false;
-    if (rafId) cancelAnimationFrame(rafId);
-    rafId = null;
-    setProgress(0);
-    hint.textContent = "再試一次，維持按壓";
+    if (done) return;
+    clearTimeout(holdTimer);
+    orb.classList.remove("is-holding");
+    orb.style.setProperty("--p", "0");
+    hint.textContent = "請維持按壓，別鬆開";
     hint.style.opacity = "1";
   }
 
   function finishReading() {
     done = true;
-    holding = false;
-    setProgress(1);
+    orb.classList.remove("is-holding");
+    orb.style.setProperty("--p", "0");
     gradient = makeGradient();
     setTimeout(renderResult, 460);
   }
@@ -202,46 +179,114 @@
   }
 
   // ---------- 下載合成 ----------
+  let noiseCache = null;
+  function paperNoise(ctx) {
+    if (noiseCache) return noiseCache;
+    const n = document.createElement("canvas");
+    n.width = n.height = 120;
+    const nc = n.getContext("2d");
+    const img = nc.createImageData(120, 120);
+    for (let i = 0; i < img.data.length; i += 4) {
+      const v = 190 + Math.random() * 60;
+      img.data[i] = img.data[i + 1] = img.data[i + 2] = v;
+      img.data[i + 3] = 20;
+    }
+    nc.putImageData(img, 0, 0);
+    noiseCache = ctx.createPattern(n, "repeat");
+    return noiseCache;
+  }
+
+  function roundRect(ctx, x, y, w, h, r) {
+    if (ctx.roundRect) { ctx.beginPath(); ctx.roundRect(x, y, w, h, r); return; }
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.arcTo(x + w, y, x + w, y + h, r);
+    ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r);
+    ctx.arcTo(x, y, x + w, y, r);
+    ctx.closePath();
+  }
+
   function composePolaroid() {
-    const S = 1080;
-    const pad = 64;
-    const bottom = 240;
-    const W = S + pad * 2;
-    const H = pad + S + bottom;
+    const S = 1080;      // 照片邊長
+    const pad = 64;      // 白框左右上
+    const bottom = 240;  // 拍立得下方白邊
+    const M = 96;        // 外圍留白（給投影用）
+    const frameW = S + pad * 2;
+    const frameH = pad + S + bottom;
+    const W = frameW + M * 2;
+    const H = frameH + M * 2;
 
     workCanvas.width = W;
     workCanvas.height = H;
     const ctx = workCanvas.getContext("2d");
+    ctx.clearRect(0, 0, W, H);
 
-    // 白框
-    ctx.fillStyle = "#f7f5f0";
-    ctx.fillRect(0, 0, W, H);
+    const fx = M, fy = M; // 白框左上角
+
+    // 投影
+    ctx.save();
+    ctx.shadowColor = "rgba(0,0,0,0.55)";
+    ctx.shadowBlur = 70;
+    ctx.shadowOffsetY = 34;
+    ctx.fillStyle = "#f5f2eb";
+    roundRect(ctx, fx, fy, frameW, frameH, 12);
+    ctx.fill();
+    ctx.restore();
+
+    // 紙張色調
+    const pg = ctx.createLinearGradient(fx, fy, fx + frameW, fy + frameH);
+    pg.addColorStop(0, "#fdfcf9");
+    pg.addColorStop(0.55, "#f4f1ea");
+    pg.addColorStop(1, "#efe9df");
+    ctx.fillStyle = pg;
+    roundRect(ctx, fx, fy, frameW, frameH, 12);
+    ctx.fill();
+
+    // 紙質顆粒
+    ctx.save();
+    ctx.globalCompositeOperation = "multiply";
+    ctx.fillStyle = paperNoise(ctx);
+    roundRect(ctx, fx, fy, frameW, frameH, 12);
+    ctx.fill();
+    ctx.restore();
+
+    const px = fx + pad, py = fy + pad; // 照片左上角
 
     // 照片
-    ctx.drawImage(capturedSource, 0, 0, capturedSource.width, capturedSource.height, pad, pad, S, S);
+    ctx.drawImage(capturedSource, 0, 0, capturedSource.width, capturedSource.height, px, py, S, S);
 
-    // 漸層覆蓋
+    // 靈魂色漸層覆蓋
     const rad = (gradient.angle * Math.PI) / 180;
-    const cx = pad + S / 2;
-    const cy = pad + S / 2;
-    const half = S / 2;
-    const dx = Math.cos(rad) * half;
-    const dy = Math.sin(rad) * half;
+    const cx = px + S / 2, cy = py + S / 2, half = S / 2;
+    const dx = Math.cos(rad) * half, dy = Math.sin(rad) * half;
     const lg = ctx.createLinearGradient(cx - dx, cy - dy, cx + dx, cy + dy);
     const n = gradient.stops.length;
     gradient.stops.forEach((c, i) => lg.addColorStop(n === 1 ? 0 : i / (n - 1), c));
     ctx.save();
     ctx.globalAlpha = 0.5;
     ctx.fillStyle = lg;
-    ctx.fillRect(pad, pad, S, S);
+    ctx.fillRect(px, py, S, S);
     ctx.restore();
+
+    // 照片內緣暗角
+    const vg = ctx.createRadialGradient(cx, cy, S * 0.28, cx, cy, S * 0.72);
+    vg.addColorStop(0, "rgba(0,0,0,0)");
+    vg.addColorStop(1, "rgba(0,0,0,0.34)");
+    ctx.fillStyle = vg;
+    ctx.fillRect(px, py, S, S);
+
+    // 照片邊緣細線
+    ctx.strokeStyle = "rgba(0,0,0,0.14)";
+    ctx.lineWidth = 2;
+    ctx.strokeRect(px + 1, py + 1, S - 2, S - 2);
 
     // 日期
     ctx.fillStyle = "#2a2730";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     ctx.font = "300 40px 'Noto Serif TC', serif";
-    ctx.fillText(formatDate(), W / 2, pad + S + bottom / 2);
+    ctx.fillText(formatDate(), fx + frameW / 2, py + S + bottom / 2);
 
     return workCanvas;
   }
@@ -277,6 +322,35 @@
     gradient = null;
     show("camera");
     startCamera();
+  });
+
+  // ---------- 惡搞付費解鎖 ----------
+  const paywall = $("paywall");
+  const unlockNote = $("unlockNote");
+
+  function openPaywall() {
+    unlockNote.textContent = "";
+    const unlock = $("unlockBtn");
+    unlock.disabled = false;
+    unlock.textContent = "立即解鎖";
+    paywall.hidden = false;
+  }
+  function closePaywall() { paywall.hidden = true; }
+
+  $("upsellBtn").addEventListener("click", openPaywall);
+  paywall.querySelectorAll("[data-close]").forEach((el) =>
+    el.addEventListener("click", closePaywall)
+  );
+  $("unlockBtn").addEventListener("click", (e) => {
+    const btn = e.currentTarget;
+    btn.disabled = true;
+    btn.textContent = "連線中";
+    unlockNote.textContent = "";
+    setTimeout(() => {
+      btn.disabled = false;
+      btn.textContent = "再試一次";
+      unlockNote.textContent = "付款失敗：偵測到您的靈魂能量不足，請稍後再試。";
+    }, 1600);
   });
 
   show("intro");

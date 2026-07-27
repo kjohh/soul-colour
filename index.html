@@ -54,22 +54,13 @@
       <div class="reading-inner">
         <p class="reading-hint" id="readingHint">請用食指輕輕按住</p>
         <div class="orb" id="orb">
-          <span class="orb-aura"></span>
-          <svg class="orb-ring" viewBox="0 0 120 120">
-            <defs>
-              <linearGradient id="ringGrad" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0%" stop-color="#7dd3fc" />
-                <stop offset="35%" stop-color="#c4b5fd" />
-                <stop offset="70%" stop-color="#f9a8d4" />
-                <stop offset="100%" stop-color="#5eead4" />
-              </linearGradient>
-            </defs>
-            <circle class="orb-ring-track" cx="60" cy="60" r="54" />
-            <circle class="orb-ring-progress" id="ringProgress" cx="60" cy="60" r="54" />
-          </svg>
+          <span class="orb-glow"></span>
+          <span class="orb-wave"></span>
+          <span class="orb-wave"></span>
+          <span class="orb-wave"></span>
+          <span class="orb-wisp"></span>
           <span class="orb-core"></span>
         </div>
-        <p class="reading-percent" id="readingPercent"></p>
       </div>
     </section>
 
@@ -84,11 +75,34 @@
       </div>
       <div class="result-actions">
         <button class="btn btn--primary" id="downloadBtn" type="button">下載拍立得</button>
+        <button class="btn btn--outline" id="upsellBtn" type="button">加上署名與靈魂說明</button>
         <button class="btn btn--ghost" id="againBtn" type="button">再測一次</button>
       </div>
     </section>
 
   </main>
+
+  <!-- 惡搞付費解鎖 -->
+  <div class="modal" id="paywall" hidden>
+    <div class="modal-backdrop" data-close></div>
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <p class="modal-eyebrow">Premium</p>
+      <h2 class="modal-title" id="modalTitle">靈魂完整報告</h2>
+      <p class="modal-desc">解鎖後即可在你的拍立得加上：</p>
+      <ul class="modal-list">
+        <li>你的專屬署名</li>
+        <li>靈魂顏色的完整能量解讀</li>
+        <li>本月運勢與靈魂共振指數</li>
+      </ul>
+      <div class="modal-price">
+        <span class="modal-amount">NT$390</span>
+        <span class="modal-per">／ 單次解鎖</span>
+      </div>
+      <button class="btn btn--primary modal-cta" id="unlockBtn" type="button">立即解鎖</button>
+      <button class="btn btn--plain" data-close type="button">殘忍地拒絕自己的靈魂</button>
+      <p class="modal-fineprint" id="unlockNote"></p>
+    </div>
+  </div>
 
   <canvas id="workCanvas" hidden></canvas>
   <script src="app.js"></script>

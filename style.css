@@ -236,18 +236,10 @@ body {
   color: var(--ink);
   transition: opacity 0.5s var(--ease);
 }
-.reading-percent {
-  font-size: 13px;
-  letter-spacing: 0.3em;
-  color: var(--ink-soft);
-  min-height: 1em;
-  font-variant-numeric: tabular-nums;
-}
-
 .orb {
   position: relative;
-  width: 168px;
-  height: 168px;
+  width: 172px;
+  height: 172px;
   display: grid;
   place-items: center;
   cursor: pointer;
@@ -255,67 +247,116 @@ body {
   -webkit-tap-highlight-color: transparent;
   --p: 0;
 }
-.orb-aura {
-  position: absolute;
-  inset: -30%;
-  border-radius: 50%;
-  background: conic-gradient(from 0deg, #7dd3fc, #c4b5fd, #f9a8d4, #5eead4, #fcd7b6, #7dd3fc);
-  filter: blur(26px);
-  opacity: calc(0.15 + var(--p) * 0.75);
-  transform: scale(calc(0.7 + var(--p) * 0.55));
-  animation: spin 6s linear infinite;
-  transition: opacity 0.25s linear, transform 0.25s var(--ease);
-  mix-blend-mode: screen;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
-.orb-aura { transform-origin: center; }
 
-.orb-ring {
+/* 柔和極光光暈，呼吸般緩慢起伏 */
+.orb-glow {
   position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  transform: rotate(-90deg);
+  inset: -55%;
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 50%,
+    rgba(125, 211, 252, 0.9), rgba(196, 181, 253, 0.7) 34%,
+    rgba(249, 168, 212, 0.5) 58%, transparent 72%);
+  filter: blur(30px);
+  opacity: calc(0.16 + var(--p) * 0.5);
+  transform: scale(calc(0.9 + var(--p) * 0.16));
+  transition: opacity 1.1s var(--ease), transform 1.1s var(--ease);
+  mix-blend-mode: screen;
+  animation: breathe 5.5s ease-in-out infinite;
 }
-.orb-ring-track {
-  fill: none;
-  stroke: rgba(243, 241, 236, 0.16);
-  stroke-width: 2;
+@keyframes breathe {
+  0%, 100% { filter: blur(30px); }
+  50%      { filter: blur(40px); }
 }
-.orb-ring-progress {
-  fill: none;
-  stroke: url(#ringGrad);
-  stroke-width: 3;
-  stroke-linecap: round;
-  stroke-dasharray: 339.29;
-  stroke-dashoffset: 339.29;
-  transition: stroke-dashoffset 0.12s linear;
+
+/* 極光流體，緩慢變形旋轉，像波動 */
+.orb-wisp {
+  position: absolute;
+  inset: -16%;
+  background: conic-gradient(from 0deg,
+    #7dd3fc, #c4b5fd, #f9a8d4, #fcd7b6, #5eead4, #7dd3fc);
+  filter: blur(20px);
+  opacity: calc(0.2 + var(--p) * 0.55);
+  transition: opacity 1.1s var(--ease);
+  mix-blend-mode: screen;
+  animation: undulate 11s ease-in-out infinite;
 }
+@keyframes undulate {
+  0%   { border-radius: 46% 54% 52% 48% / 50% 46% 54% 50%; transform: rotate(0deg) scale(1); }
+  33%  { border-radius: 58% 42% 44% 56% / 56% 54% 46% 44%; transform: rotate(120deg) scale(1.06); }
+  66%  { border-radius: 42% 58% 56% 44% / 44% 48% 52% 56%; transform: rotate(240deg) scale(0.97); }
+  100% { border-radius: 46% 54% 52% 48% / 50% 46% 54% 50%; transform: rotate(360deg) scale(1); }
+}
+
+/* 從圓心向外擴散的能量波 */
+.orb-wave {
+  position: absolute;
+  width: 130px;
+  height: 130px;
+  border-radius: 50%;
+  background: radial-gradient(circle,
+    rgba(196, 181, 253, 0.5), rgba(125, 211, 252, 0.3) 45%, transparent 68%);
+  mix-blend-mode: screen;
+  animation: emanate 3.4s ease-out infinite;
+  animation-play-state: paused;
+  visibility: hidden;
+  pointer-events: none;
+}
+.orb-wave:nth-of-type(3) { animation-delay: 1.13s; }
+.orb-wave:nth-of-type(4) { animation-delay: 2.26s; }
+.orb.is-holding .orb-wave {
+  animation-play-state: running;
+  visibility: visible;
+}
+@keyframes emanate {
+  0%   { transform: scale(0.7); opacity: 0.6; }
+  100% { transform: scale(2.7); opacity: 0; }
+}
+
 .orb-core {
   position: relative;
-  width: 128px;
-  height: 128px;
+  width: 122px;
+  height: 122px;
   border-radius: 50%;
   background:
-    radial-gradient(circle at 38% 34%, rgba(243,241,236,0.28), rgba(243,241,236,0.04) 55%),
-    rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(243, 241, 236, 0.28);
-  backdrop-filter: blur(6px);
-  box-shadow: inset 0 0 30px rgba(255,255,255,0.06), 0 8px 30px -12px rgba(0,0,0,0.6);
-  transform: scale(calc(1 - var(--p) * 0.05));
-  transition: transform 0.2s var(--ease);
+    radial-gradient(circle at 38% 32%, rgba(255, 255, 255, 0.34), rgba(255, 255, 255, 0.05) 52%),
+    rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(243, 241, 236, 0.3);
+  backdrop-filter: blur(4px);
+  box-shadow:
+    inset 0 1px 12px rgba(255, 255, 255, 0.16),
+    inset 0 -8px 22px rgba(120, 90, 180, 0.18),
+    0 10px 34px -14px rgba(0, 0, 0, 0.6);
+  transform: scale(calc(1 + var(--p) * 0.04));
+  transition: transform 0.9s var(--ease);
 }
 
 /* ---------- 結果拍立得 ---------- */
 .screen--result { gap: 30px; }
 .polaroid {
+  position: relative;
   width: min(78vw, 320px);
-  background: #f7f5f0;
+  background: linear-gradient(158deg, #fdfcf9 0%, #f4f1ea 55%, #efe9df 100%);
   padding: 16px 16px 0;
-  border-radius: 4px;
-  box-shadow: 0 40px 90px -30px rgba(0,0,0,0.75), 0 2px 6px rgba(0,0,0,0.3);
+  border-radius: 5px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.85),
+    0 2px 4px rgba(0, 0, 0, 0.16),
+    0 22px 40px -18px rgba(0, 0, 0, 0.55),
+    0 50px 90px -34px rgba(0, 0, 0, 0.7);
   transform: rotate(-1.4deg);
   animation: develop 1.4s var(--ease) both;
+}
+/* 紙質顆粒 */
+.polaroid::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 5px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+  background-size: 160px 160px;
+  opacity: 0.28;
+  mix-blend-mode: multiply;
+  pointer-events: none;
 }
 @keyframes develop {
   0%   { opacity: 0; transform: rotate(-1.4deg) translateY(24px) scale(0.96); }
@@ -326,6 +367,7 @@ body {
   aspect-ratio: 1 / 1;
   overflow: hidden;
   background: #000;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
 }
 .polaroid-photo img {
   width: 100%;
@@ -340,6 +382,15 @@ body {
   animation: wash 1.6s var(--ease) both;
 }
 @keyframes wash { from { opacity: 0; } to { opacity: 0.5; } }
+/* 照片內緣暗角，增加沖洗真實感 */
+.polaroid-photo::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  box-shadow: inset 0 0 26px rgba(0, 0, 0, 0.34), inset 0 0 2px rgba(0, 0, 0, 0.4);
+  pointer-events: none;
+  z-index: 2;
+}
 .polaroid-caption {
   height: 74px;
   display: flex;
@@ -358,7 +409,126 @@ body {
   align-items: center;
 }
 
+.btn--outline {
+  padding: 14px 32px;
+  background: transparent;
+  border: 1px solid rgba(243, 241, 236, 0.42);
+  color: var(--ink);
+  font-weight: 400;
+}
+.btn--plain {
+  background: none;
+  border: none;
+  color: var(--ink-faint);
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  font-weight: 300;
+  padding: 14px 8px 2px;
+}
+
+/* ---------- 惡搞付費解鎖 ---------- */
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+.modal[hidden] { display: none; }
+.modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(6, 6, 12, 0.62);
+  backdrop-filter: blur(8px);
+  animation: fade 0.4s ease both;
+}
+@keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+.modal-card {
+  position: relative;
+  width: 100%;
+  max-width: 340px;
+  background: linear-gradient(165deg, rgba(30, 28, 44, 0.96), rgba(18, 16, 28, 0.98));
+  border: 1px solid rgba(243, 241, 236, 0.12);
+  border-radius: 22px;
+  padding: 34px 28px 24px;
+  text-align: center;
+  box-shadow: 0 40px 100px -30px rgba(0, 0, 0, 0.8);
+  animation: pop 0.5s var(--ease) both;
+}
+@keyframes pop {
+  from { opacity: 0; transform: translateY(16px) scale(0.96); }
+  to   { opacity: 1; transform: none; }
+}
+.modal-eyebrow {
+  font-size: 11px;
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+  color: #c4b5fd;
+  padding-left: 0.4em;
+}
+.modal-title {
+  font-family: var(--serif);
+  font-weight: 300;
+  font-size: 26px;
+  letter-spacing: 0.06em;
+  margin-top: 10px;
+}
+.modal-desc {
+  margin-top: 16px;
+  font-size: 13px;
+  font-weight: 300;
+  color: var(--ink-soft);
+}
+.modal-list {
+  list-style: none;
+  margin: 14px auto 0;
+  display: inline-flex;
+  flex-direction: column;
+  gap: 9px;
+  text-align: left;
+}
+.modal-list li {
+  position: relative;
+  padding-left: 18px;
+  font-size: 14px;
+  font-weight: 300;
+  letter-spacing: 0.04em;
+}
+.modal-list li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.55em;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--aurora);
+}
+.modal-price {
+  margin: 22px 0 20px;
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 8px;
+}
+.modal-amount {
+  font-family: var(--serif);
+  font-weight: 300;
+  font-size: 34px;
+}
+.modal-per { font-size: 12px; color: var(--ink-faint); }
+.modal-cta { width: 100%; }
+.modal-fineprint {
+  min-height: 1em;
+  margin-top: 12px;
+  font-size: 12px;
+  font-weight: 300;
+  letter-spacing: 0.04em;
+  color: #f9a8d4;
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .blob, .orb-aura { animation: none; }
+  .blob, .orb-glow, .orb-wisp, .orb-wave { animation: none; }
   .screen { transition: opacity 0.3s linear; transform: none; }
 }
