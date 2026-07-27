@@ -356,37 +356,37 @@ body {
   flex-direction: column;
   align-items: center;
 }
-/* 細長凹陷的出紙開槽 */
+/* 出紙孔橫桿 */
 .print-slot {
-  width: min(88vw, 360px);
-  height: 12px;
-  border-radius: 7px;
-  background: linear-gradient(#000000, #101017 45%, #050509);
+  width: min(90vw, 372px);
+  height: 18px;
+  border-radius: 4px;
+  background: linear-gradient(#1d1d24, #0c0c12 55%, #050509);
   box-shadow:
-    inset 0 3px 5px rgba(0, 0, 0, 0.95),
-    inset 0 -2px 3px rgba(0, 0, 0, 0.85),
-    0 1px 0 rgba(255, 255, 255, 0.08),
-    0 -1px 2px rgba(0, 0, 0, 0.6);
-  position: relative;
-  z-index: 5;
-  margin-bottom: -6px; /* 開槽下半壓住紙面上緣，紙從槽中穿出 */
-}
-/* 開槽下緣投在紙面上的陰影 */
-.print-slot::after {
-  content: "";
-  position: absolute;
-  left: 6px;
-  right: 6px;
-  top: 100%;
-  height: 14px;
-  background: linear-gradient(rgba(0, 0, 0, 0.3), transparent);
-  pointer-events: none;
-}
-/* 以開槽中線為上緣裁切：槽線以上（機器內）不顯示，左右下留白給投影 */
-.print-window {
+    inset 0 2px 3px rgba(255, 255, 255, 0.06),
+    inset 0 -3px 6px rgba(0, 0, 0, 0.9),
+    0 4px 12px rgba(0, 0, 0, 0.5);
   position: relative;
   z-index: 1;
+}
+/* 拍立得疊在橫桿之上，並上壓到桿的中線，看起來像從桿中縫穿出 */
+.print-window {
+  position: relative;
+  z-index: 3;
+  margin-top: -9px; /* 半個桿高：紙面上緣落在桿中線 */
   clip-path: inset(0 -160px -160px -160px);
+}
+/* 桿中線投在紙面上的陰影，強化「從縫中穿出」 */
+.print-window::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 22px;
+  background: linear-gradient(rgba(0, 0, 0, 0.42), transparent);
+  z-index: 3;
+  pointer-events: none;
 }
 
 .polaroid {
@@ -400,6 +400,7 @@ body {
     0 2px 4px rgba(0, 0, 0, 0.16),
     0 22px 40px -18px rgba(0, 0, 0, 0.55),
     0 50px 90px -34px rgba(0, 0, 0, 0.7);
+  z-index: 1;
 }
 /* 照片整張從洞口上方往正下方平移吐出 */
 .polaroid.printing { animation: eject 1.9s cubic-bezier(0.32, 0.06, 0.2, 1) both; }
