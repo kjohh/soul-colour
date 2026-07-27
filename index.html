@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>靈魂顏色偵測儀</title>
+  <meta name="description" content="讓儀器讀取你此刻的靈魂顏色，生成一張專屬拍立得。" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3CradialGradient id='g' cx='38%25' cy='34%25'%3E%3Cstop offset='0%25' stop-color='%23f9a8d4'/%3E%3Cstop offset='45%25' stop-color='%23c4b5fd'/%3E%3Cstop offset='100%25' stop-color='%235eead4'/%3E%3C/radialGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='8' fill='%230b0b12'/%3E%3Ccircle cx='16' cy='16' r='9' fill='url(%23g)'/%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500&family=Noto+Serif+TC:wght@200;300;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="ambient" aria-hidden="true">
+    <span class="blob blob-a"></span>
+    <span class="blob blob-b"></span>
+    <span class="blob blob-c"></span>
+  </div>
+
+  <main class="stage" id="stage">
+
+    <!-- 開場 -->
+    <section class="screen screen--intro is-active" data-screen="intro">
+      <div class="intro-inner">
+        <p class="eyebrow">Soul Colour Instrument</p>
+        <h1 class="title">靈魂顏色<br />偵測儀</h1>
+        <p class="lede">閉上眼，深呼吸。<br />讓儀器讀取你此刻散發的靈魂顏色。</p>
+        <button class="btn btn--primary" id="startBtn" type="button">開始偵測</button>
+        <p class="fineprint">全程於裝置端進行，不會上傳任何影像。</p>
+      </div>
+    </section>
+
+    <!-- 相機 -->
+    <section class="screen screen--camera" data-screen="camera">
+      <div class="camera-frame">
+        <video id="video" playsinline autoplay muted></video>
+        <div class="camera-guide" aria-hidden="true"></div>
+      </div>
+      <p class="camera-hint" id="cameraHint">將臉放進中央，保持放鬆</p>
+      <div class="camera-controls">
+        <button class="shutter" id="shutterBtn" type="button" aria-label="拍照"></button>
+      </div>
+      <div class="upload-fallback" id="uploadFallback" hidden>
+        <p>無法使用相機。</p>
+        <label class="btn btn--ghost">
+          改為上傳一張照片
+          <input type="file" accept="image/*" id="fileInput" hidden />
+        </label>
+      </div>
+    </section>
+
+    <!-- 按壓讀取 -->
+    <section class="screen screen--reading" data-screen="reading">
+      <div class="reading-photo" id="readingPhoto"></div>
+      <div class="reading-veil"></div>
+      <div class="reading-inner">
+        <p class="reading-hint" id="readingHint">請用食指輕輕按住</p>
+        <div class="orb" id="orb">
+          <span class="orb-aura"></span>
+          <svg class="orb-ring" viewBox="0 0 120 120">
+            <defs>
+              <linearGradient id="ringGrad" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#7dd3fc" />
+                <stop offset="35%" stop-color="#c4b5fd" />
+                <stop offset="70%" stop-color="#f9a8d4" />
+                <stop offset="100%" stop-color="#5eead4" />
+              </linearGradient>
+            </defs>
+            <circle class="orb-ring-track" cx="60" cy="60" r="54" />
+            <circle class="orb-ring-progress" id="ringProgress" cx="60" cy="60" r="54" />
+          </svg>
+          <span class="orb-core"></span>
+        </div>
+        <p class="reading-percent" id="readingPercent"></p>
+      </div>
+    </section>
+
+    <!-- 結果 -->
+    <section class="screen screen--result" data-screen="result">
+      <div class="polaroid" id="polaroid">
+        <div class="polaroid-photo">
+          <img id="resultImg" alt="你的靈魂顏色拍立得" />
+          <div class="polaroid-overlay" id="resultOverlay"></div>
+        </div>
+        <div class="polaroid-caption" id="resultCaption"></div>
+      </div>
+      <div class="result-actions">
+        <button class="btn btn--primary" id="downloadBtn" type="button">下載拍立得</button>
+        <button class="btn btn--ghost" id="againBtn" type="button">再測一次</button>
+      </div>
+    </section>
+
+  </main>
+
+  <canvas id="workCanvas" hidden></canvas>
+  <script src="app.js"></script>
+</body>
+</html>
