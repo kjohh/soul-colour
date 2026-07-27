@@ -307,19 +307,43 @@
     return workCanvas;
   }
 
-  function download() {
-    const canvas = composePolaroid();
-    canvas.toBlob((blob) => {
-      if (!blob) return;
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "soul-colour.png";
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      setTimeout(() => URL.revokeObjectURL(url), 1000);
-    }, "image/png");
+  function dataURLtoBlob(dataURL) {
+    const [head, b64] = dataURL.split(",");
+    const mime = head.match(/:(.*?);/)[1];
+    const bin = atob(b64);
+    const arr = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+    return new Blob([arr], { type: mime });
+  }
+
+  function browserDownload(blob) {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "soul-colour.png";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+
+  // 手機優先叫出系統分享面板（可「儲存影像」到相簿）；桌機退回一般下載。
+  // 注意：share 必須在使用者點擊的同步流程中呼叫，故用同步的 toDataURL。
+  function saveImage() {
+    const dataURL = composePolaroid().toDataURL("image/png");
+    const blob = dataURLtoBlob(dataURL);
+    const file = new File([blob], "soul-colour.png", { type: "image/png" });
+
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      navigator
+        .share({ files: [file], title: "靈魂顏色拍立得" })
+        .catch((err) => {
+          // 使用者取消不處理；其他錯誤才退回下載
+          if (err && err.name !== "AbortError") browserDownload(blob);
+        });
+      return;
+    }
+    browserDownload(blob);
   }
 
   // ---------- 綁定 ----------
@@ -332,7 +356,7 @@
     const f = e.target.files && e.target.files[0];
     if (f) handleUpload(f);
   });
-  $("downloadBtn").addEventListener("click", download);
+  $("downloadBtn").addEventListener("click", saveImage);
   $("againBtn").addEventListener("click", () => {
     capturedSource = null;
     gradient = null;
